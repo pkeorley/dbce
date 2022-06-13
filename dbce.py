@@ -1,3 +1,5 @@
+import datetime
+
 import disnake
 from disnake.ext import commands
 
@@ -45,19 +47,50 @@ class Helper:
                 embed = disnake.Embed()
 
                 while "$title[" in code:
-                    title = code.split("$title[")[1].split("]")[0]
-                    embed.title = title or None
-                    code = code.replace(f"$title[{title}]", "")
+                    title = code.split("$title[")[1].split("]")[0].split(";")
+                    embed.title = title[0]
+                    embed.url = title[1]
+                    code = code.replace(f"$title[{title[0]};{title[1]}]", "")
 
                 while "$description[" in code:
                     description = code.split("$description[")[1].split("]")[0]
-                    embed.description = description or None
+                    embed.description = description
                     code = code.replace(f"$description[{description}]", "")
 
                 while "$color[" in code:
                     color = code.split("$color[")[1].split("]")[0]
                     embed.colour = hex(int("0x" + color, 16))
                     code = code.replace(f"$color[{color}]", "")
+
+                while "$addField[" in code:
+                    field = code.split("$addField[")[1].split("]")[0].split(";")
+                    embed.add_field(name=field[0], value=field[1])
+                    code = code.replace(f"$addField[{field[0]};{field[1]}]", "")
+
+                while "$addTimestamp[" in code:
+                    timestamp = code.split("$addTimestamp[")[1].split("]")[0]
+                    embed.timestamp = datetime.datetime(**timestamp)
+                    code = code.replace(f"$addTimestamp[{timestamp}]", "")
+
+                while "$addImage[" in code:
+                    image = code.split("$addImage[")[1].split("]")[0]
+                    embed.set_image(url=image)
+                    code = code.replace(f"$addImage[{image}]", "")
+
+                while "$addThumbnail[" in code:
+                    thumb = code.split("$addThumbnail[")[1].split("]")[0]
+                    embed.set_thumbnail(url=thumb)
+                    code = code.replace(f"$addThumbnail[{thumb}]", "")
+
+                while "$addAuthor[" in code:
+                    author = code.split("$addAuthor[")[1].split("]")[0].split(";")
+                    embed.set_author(name=author[0], url=author[1])
+                    code = code.replace(f"$addAuthor[{author}]", "")
+
+                while "$addFooter[" in code:
+                    footer = code.split("$addFooter[")[1].split("]")[0].split(";")
+                    embed.set_footer(text=footer[0], icon_url=footer[1])
+                    code = code.replace(f"$addFooter[{footer}]", "")
 
                 try:
                     await message.channel.send(content=code, embed=embed)
